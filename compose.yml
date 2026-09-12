@@ -1,0 +1,12 @@
+services:
+  supertonic:
+    build: .
+    container_name: supertonic-tts
+    restart: unless-stopped
+    ports:
+      - "7788:7788"
+    volumes:
+      - ./models:/models
+    environment:
+      SUPERTONIC_CACHE_DIR: /models
+
