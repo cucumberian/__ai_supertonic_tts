@@ -9,3 +9,19 @@ services:
       - ./models:/models
     environment:
       SUPERTONIC_CACHE_DIR: /models/supertonic
+    healthcheck:
+      # The slim image has no curl; stdlib urllib is enough. `voices_loaded`
+      # stays 0 until the model has finished loading, so this holds the
+      # container in `starting` until it can genuinely synthesize — not just
+      # answer HTTP.
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import json,sys,urllib.request; d=json.load(urllib.request.urlopen('http://127.0.0.1:7788/v1/health',timeout=4)); sys.exit(0 if d.get('status')=='ok' and d.get('voices_loaded') else 1)",
+        ]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 90s
